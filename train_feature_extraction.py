@@ -13,12 +13,20 @@ with open(training_file, mode='rb') as f:
 
 # TODO: Split data into training and validation sets.
 
-X_train, X_test, y_train, y_test = train_test_split(train['features'], train['labels'], test_size=0.33, random_state=0)
+# X_train, X_test, y_train, y_test = train_test_split(train['features'], train['labels'], test_size=0.33, random_state=0)
+from keras.datasets import cifar10
+(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+# y_train.shape is 2d, (50000, 1). While Keras is smart enough to handle this
+# it's a good idea to flatten the array.
+y_train = y_train.reshape(-1)
+y_test = y_test.reshape(-1)
+X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.3, random_state=42, stratify = y_train)
+
 
 # TODO: Define placeholders and resize operation.
 x = tf.placeholder(tf.float32, (None, 32, 32, 3), name="x")
 y = tf.placeholder(tf.int32, (None), name="y")
-one_hot_y = tf.one_hot(y, 43)
+one_hot_y = tf.one_hot(y, nb_classes)
 resized = tf.image.resize_images(x, [227, 227])
 
 # TODO: pass placeholder as first argument to `AlexNet`.
@@ -48,7 +56,7 @@ cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=one_hot_y, logits
 loss_operation = tf.reduce_mean(cross_entropy)
 optimizer = tf.train.AdamOptimizer(learning_rate = rate)
 training_operation = optimizer.minimize(loss_operation)
-EPOCHS = 20
+EPOCHS = 10
 BATCH_SIZE = 128
 epsilon = 1e-3
 
@@ -79,7 +87,7 @@ with tf.Session() as sess:
             sess.run(training_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: 0.5})
             
         train_accuracy = evaluate(X_train, y_train)
-        validation_accuracy = evaluate(X_test, y_test)
+        validation_accuracy = evaluate(X_valid, y_valid)
         print("EPOCH {} ...".format(i+1))
         print("Training Accuracy = {:.3f}".format(train_accuracy))
         print("Validation Accuracy = {:.3f}".format(validation_accuracy))

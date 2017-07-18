@@ -21,9 +21,13 @@ sess.run(init)
 # Read Images
 im1 = (imread("poodle.png")[:, :, :3]).astype(np.float32)
 im1 = im1 - np.mean(im1)
+# im1 = tf.image.decode_jpeg(im1)
+# im1 = tf.image.resize_images(im1, [277, 277])
 
 im2 = (imread("weasel.png")[:, :, :3]).astype(np.float32)
 im2 = im2 - np.mean(im2)
+# im2 = tf.image.decode_jpeg(im2)
+# im2 = tf.image.resize_images(im2, [277, 277])
 
 # Run Inference
 t = time.time()
